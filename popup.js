@@ -97,7 +97,7 @@ function saveWindow(event) {
       savedWindow = backgroundPage.saveWindow(currentWindow, nameInput.value);
       formEl.style.display = "none";
       appendWindowToList(savedWindow, nameInput.value);
-      backgroundPage._gaq.push(['_trackEvent', 'popup', 'saveWindow', 'Value is tab count.', savedWindow.tabs.length]);
+      //backgroundPage._gaq.push(['_trackEvent', 'popup', 'saveWindow', 'Value is tab count.', savedWindow.tabs.length]);
     });
   });
 }
@@ -115,7 +115,7 @@ function openSavedWindow(event) {
   backgroundPage.openWindow(name);
 
   var savedWindow = backgroundPage.savedWindows[name];
-  backgroundPage._gaq.push(['_trackEvent', 'popup', 'openWindow', 'Value is tab count.', savedWindow.tabs.length]);
+  //backgroundPage._gaq.push(['_trackEvent', 'popup', 'openWindow', 'Value is tab count.', savedWindow.tabs.length]);
 }
 
 
@@ -131,7 +131,7 @@ function focusOpenWindow(event) {
   var savedWindow = backgroundPage.savedWindows[name];
 
   chrome.windows.update(savedWindow.id, {focused: true});
-  backgroundPage._gaq.push(['_trackEvent', 'popup', 'focusWindow']);
+  //backgroundPage._gaq.push(['_trackEvent', 'popup', 'focusWindow']);
 }
 
 
@@ -167,7 +167,7 @@ function deleteSavedWindow(event) {
   setText(li, "<b>" + getDisplayName(savedWindow) + "<\/b> was deleted.");
   // TODO: show the form if current window
 
-  backgroundPage._gaq.push(['_trackEvent', 'popup', 'deleteWindow', 'Value is tab count.', savedWindow.tabs.length]);
+  //backgroundPage._gaq.push(['_trackEvent', 'popup', 'deleteWindow', 'Value is tab count.', savedWindow.tabs.length]);
 }
 
 
@@ -199,7 +199,7 @@ function undoDeleteSavedWindow(event) {
   delete undo[name];
   // TODO: hide the form if current window
 
-  backgroundPage._gaq.push(['_trackEvent', 'popup', 'undoDeleteWindow', 'Value is tab count.', savedWindow.tabs.length]);
+  //backgroundPage._gaq.push(['_trackEvent', 'popup', 'undoDeleteWindow', 'Value is tab count.', savedWindow.tabs.length]);
 }
 
 
