@@ -14,7 +14,14 @@ var DEFAULT_NAME = "Window";
 
 /* BASIC STATE */
 // an array of the names of all saved windows
-var savedWindowNames = restoreFromLocalStorage("savedWindowNames", new Array());
+//var savedWindowNames = restoreFromLocalStorage("savedWindowNames", new Array());
+var savedWindowNames = null;
+asyncRestoreFromStorage("savedWindowNames", new Array())
+  .then((result) => {
+    savedWindowNames = result;
+    init();
+  })
+
 
 // saved windows, keyed by name
 // If the savedWindow has an id, it is currently open.
@@ -40,54 +47,61 @@ var isWindowClosing = new Object();
 
 
 /* INIT */
+function init() {
+  // Google Analytics
+  // var _gaq = _gaq || [];
+  // _gaq.push(['_setAccount', 'UA-18459718-1']);
+  // _gaq.push(['_setCustomVar', 1, 'windowCount', savedWindowNames.length, 1]);
+  // (function() {
+  //   var ga = document.createElement('script');
+  //   ga.type = 'text/javascript';
+  //   ga.async = true;
+  //   ga.src = 'https://www.google-analytics.com/ga.js';
+  //   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  // })();
 
 
-// Google Analytics
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-18459718-1']);
-_gaq.push(['_setCustomVar', 1, 'windowCount', savedWindowNames.length, 1]);
-(function() {
-  var ga = document.createElement('script');
-  ga.type = 'text/javascript';
-  ga.async = true;
-  ga.src = 'https://www.google-analytics.com/ga.js';
-  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-})();
-
-
-// populate savedWindows from local storage
-// as we go, try matching them to open windows
-chrome.windows.getAll({populate:true}, function(browserWindows) {
-  for (var i in savedWindowNames) {
-    var name = savedWindowNames[i];
-    var savedWindow  = restoreFromLocalStorage(name);
-    if (!savedWindow) {
-      console.error("Window " + name + " was not found in localStorage.");
-      savedWindowNames.splice(savedWindowNames.indexOf(name), 1);
-      localStorage.savedWindowNames = JSON.stringify(savedWindowNames);
-      continue;
+  // populate savedWindows from local storage
+  // as we go, try matching them to open windows
+  chrome.windows.getAll({populate:true}, function(browserWindows) {
+    for (var i in savedWindowNames) {
+      var name = savedWindowNames[i];
+      //var savedWindow  = restoreFromLocalStorage(name);
+      asyncRestoreFromStorage(name)
+        .then((result) => {
+          var savedWindow = result;
+          let name = savedWindow.name;
+          if (!savedWindow) {
+            console.error("Window " + name + " was not found in localStorage.");
+            savedWindowNames.splice(savedWindowNames.indexOf(name), 1);
+            //localStorage.savedWindowNames = JSON.stringify(savedWindowNames);
+            saveToLocalStorage("savedWindowNames", savedWindowNames);
+            return;
+          }
+    
+          savedWindows[name] = savedWindow;
+    
+          // by default, we assume the window is closed (id is undefined)
+          delete savedWindow.id;
+    
+          // now, let's check if it's one of the open windows
+          for (var j in browserWindows) {
+            var browserWindow = browserWindows[j];
+            if (windowsAreEqual(browserWindow, savedWindow)) {
+              storeWindow(browserWindow, name, savedWindow.displayName);
+              markWindowAsOpen(browserWindow);
+              break;
+            }
+          }
+    
+          if (!savedWindows[name].id) {
+            closedWindows[name] = savedWindows[name];
+          }    
+        
+        });
     }
-
-    savedWindows[name] = savedWindow;
-
-    // by default, we assume the window is closed (id is undefined)
-    delete savedWindow.id;
-
-    // now, let's check if it's one of the open windows
-    for (var j in browserWindows) {
-      var browserWindow = browserWindows[j];
-      if (windowsAreEqual(browserWindow, savedWindow)) {
-        storeWindow(browserWindow, name, savedWindow.displayName);
-        markWindowAsOpen(browserWindow);
-        break;
-      }
-    }
-
-    if (!savedWindows[name].id) {
-      closedWindows[name] = savedWindows[name];
-    }
-  }
-});
+  });
+}
 
 
 // compares a current window to a saved window
@@ -128,7 +142,8 @@ function saveWindow(browserWindow, displayName) {
 
   // add window to indexes
   savedWindowNames.push(name);
-  localStorage.savedWindowNames = JSON.stringify(savedWindowNames);
+  //localStorage.savedWindowNames = JSON.stringify(savedWindowNames);
+  saveToLocalStorage("savedWindowNames", savedWindowNames);
 
   storeWindow(browserWindow, name, displayName);
   if (browserWindow.id) {
@@ -146,7 +161,8 @@ function storeWindow(browserWindow, name, displayName) {
   browserWindow.displayName = displayName;
 
   savedWindows[name] = browserWindow;
-  localStorage[name] = JSON.stringify(browserWindow);
+  //localStorage[name] = JSON.stringify(browserWindow);
+  saveToLocalStorage(name, browserWindow);
 
   return browserWindow;
 }
@@ -207,7 +223,8 @@ function onWindowOpened(savedWindow, browserWindow) {
   // move the window to the end of the list (so it appears at the top of the popup)
   savedWindowNames.splice(savedWindowNames.indexOf(savedWindow.name), 1);
   savedWindowNames[savedWindowNames.length] = savedWindow.name;
-  localStorage.savedWindowNames = JSON.stringify(savedWindowNames);
+  //localStorage.savedWindowNames = JSON.stringify(savedWindowNames);
+  saveToLocalStorage("savedWindowNames", savedWindowNames);
 }
 
 
@@ -225,8 +242,10 @@ function deleteSavedWindow(name) {
   }
 
   delete closedWindows[savedWindow.name];
-  delete localStorage[name];
+  //delete localStorage[name];
+  deleteFromLocalStorage(name);
   delete savedWindows[name];
   savedWindowNames.splice(savedWindowNames.indexOf(name), 1);
-  localStorage.savedWindowNames = JSON.stringify(savedWindowNames);
+  //localStorage.savedWindowNames = JSON.stringify(savedWindowNames);
+  saveToLocalStorage("savedWindowNames", savedWindowNames);
 }

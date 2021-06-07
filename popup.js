@@ -46,7 +46,8 @@ function init() {
   var count = backgroundPage.updateMsgCount;
   if (count > 0) {
     backgroundPage.updateMsgCount = count - 1;
-    localStorage.updateMsgCount = count - 1;
+    //localStorage.updateMsgCount = count - 1;
+    saveToLocalStorage("updateMsgCount", count - 1);
     document.getElementById("update").style.display = "block";
   } else {
     backgroundPage.updateBadgeForAllWindows();

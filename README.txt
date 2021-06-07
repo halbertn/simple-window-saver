@@ -1,3 +1,15 @@
+Improved Simple Window Saver
+Change log of fork halbertn/simple-window-saver
+===
+* refactored extension to use chrome.storage API
+* saved state will sync with all chrome browsers that the user is logged into, provided the user has sync enabled 
+* removing google analaytics snippet
+
+TODO:
+* add export feature to store all saved windows as bookmark html
+* add import feature to import bookmark html into saved windows
+
+
 Change log of fork emreberge/simple-window-saver
 ===
 * Command+Ctrl+N opens extension popup

@@ -4,16 +4,24 @@
 
 
 // used to count how many times we show the update message
-var updateMsgCount = restoreFromLocalStorage("updateMsgCount", 0);
-
+//var updateMsgCount = restoreFromLocalStorage("updateMsgCount", 0);
 
 // if the extension has been updated, show the update message 5 times
-if (!localStorage.version) {
-  localStorage.version = "1.3";
+// if (!localStorage.version) {
+//   localStorage.version = "1.3";
+// }
+// if (parseFloat(localStorage.version) < 1.3) {
+//   updateMsgCount = 5;
+//   localStorage.version = "1.3";
+
+var updateMsgCount = asyncRestoreFromStorage("updateMsgCount", 0);
+
+if (!getFromLocalStorage("version")) {
+  saveToLocalStorage("version", "1.3")
 }
-if (parseFloat(localStorage.version) < 1.3) {
+if (parseFloat(getFromLocalStorage("version")) < 1.3) {
   updateMsgCount = 5;
-  localStorage.version = "1.3";
+  saveToLocalStorage("version", "1.3");
 }
 if (updateMsgCount > 0) {
   updateBadgeForAllWindows();

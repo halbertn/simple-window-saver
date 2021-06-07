@@ -1,5 +1,5 @@
 {
-  "name": "Simple Window Saver",
+  "name": "Improved Simple Window Saver",
   "version": "1.4",
   "description": "Save and restore windows.",
   "manifest_version": 2,
@@ -25,7 +25,8 @@
     ]
   },
   "permissions": [
-    "tabs"
+    "tabs",
+    "storage"
   ],
   "commands": {
     "_execute_browser_action": {
